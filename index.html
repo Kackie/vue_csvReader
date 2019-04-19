@@ -16,8 +16,9 @@
 </style>
 </head>
 <body>
-<div id="app" style="padding:20px;" v-cloak>
+<div id="app" style="padding:20px;display: inline-block;position: relative;" v-cloak>
 <p style="margin-bottom:20px">ソート：<input type="text" v-model.trim="keyword" v-on:keyup.esc="keyword=''"></p>
+<p style="position:absolute;top:20px;right:20px;"><a v-bind:href="csvFile" download>CSVダウンロード</a></p>
 <table v-if="tableMode">
 <thead>
 <tr>
@@ -30,8 +31,6 @@
 </tr>
 </tbody>
 </table>
-
-<p><a v-bind:href="csvFile" download>CSVダウンロード</a></p>
 </div><!-- /#app -->
 
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
