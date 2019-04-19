@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Document</title>
+<style>
+    abbr,address,article,aside,audio,b,blockquote,body,canvas,caption,cite,code,dd,del,details,dfn,div,dl,dt,em,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,html,i,iframe,img,ins,kbd,label,legend,li,mark,menu,nav,object,ol,p,pre,q,samp,section,small,span,strong,sub,summary,sup,table,tbody,td,tfoot,th,thead,time,tr,ul,var,video{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:0 0}body{line-height:1}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}nav ul{list-style:none}blockquote,q{quotes:none}blockquote:after,blockquote:before,q:after,q:before{content:'';content:none}a{margin:0;padding:0;font-size:100%;vertical-align:baseline;background:0 0}ins{background-color:#ff9;color:#000;text-decoration:none}mark{background-color:#ff9;color:#000;font-style:italic;font-weight:700}del{text-decoration:line-through}abbr[title],dfn[title]{border-bottom:1px dotted;cursor:help}table{border-collapse:collapse;border-spacing:0}hr{display:block;height:1px;border:0;border-top:1px solid #ccc;margin:1em 0;padding:0}input,select{vertical-align:middle}
+    [v-cloak]{display: none;}
+    *{word-break: break-all;}
+    table{font-size: 12px;border-top: 1px solid #ddd;border-left: 1px solid #ddd;margin-bottom: 30px;}
+    table th,table td{vertical-align: top;text-align: left;border-right: 1px solid #ddd;border-bottom: 1px solid #ddd;padding: 8px 10px;}
+    table th{white-space: nowrap;border-bottom-width: 2px;}
+    tbody tr:nth-child(even){background: #eee;}
+</style>
+</head>
+<body>
+<div id="app" style="padding:20px;" v-cloak>
+<p style="margin-bottom:20px">ソート：<input type="text" v-model.trim="keyword" v-on:keyup.esc="keyword=''"></p>
+<table v-if="tableMode">
+<thead>
+<tr>
+<th v-for="(value,index) in getCSV[0]">{{value}}</th>
+</tr>
+</thead>
+<tbody>
+<tr v-for="(col,index) in getCSV">
+<td v-if="index>0" v-for="(value,colIndex) in col" v-html="valueWrite(value)" v-bind:title="getCSV[0][colIndex]"></td>
+</tr>
+</tbody>
+</table>
+
+<p>デバッグ用</p>
+<div style="width:600px;height:300px;overflow:auto;">
+<pre>{{getCSV}}</pre>
+</div>
+<p><a v-bind:href="csvFile" download>CSVダウンロード</a></p>
+</div><!-- /#app -->
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+var app = new Vue({
+    el:'#app',
+    data:{
+        keyword:'',
+        tableMode:true,
+        csvFile:'restaurant_data.csv'
+    },
+    computed:{
+        getCSV:function(){
+            var txt = new XMLHttpRequest();
+            txt.open('get', this.csvFile, false);
+            txt.send();
+
+            //改行ごとに配列化
+            var arr = txt.responseText.split('\n');
+            var sortArr = [];
+            //ソート
+            for(var j=0;j<arr.length;j++){
+                if(j===0){
+                    sortArr.push(arr[j]);
+                }else if(arr[j].indexOf(this.keyword) !== -1) {
+                    sortArr.push(arr[j]);
+                }
+            }
+            
+            //1次元配列を2次元配列に変換
+            var res = [];
+            for(var i = 0; i < sortArr.length; i++){
+                //空白行が出てきた時点で終了
+                if(sortArr[i] == '') break;
+
+                //","ごとに配列化
+                res[i] = sortArr[i].split(',');
+            }
+            return res;
+        }
+    },
+    methods:{
+        valueWrite:function(value){
+            value = value.replace(/^(https?|ftp)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)$/, "<a href='"+value+"' target='_blank'>"+value+"</a>");
+            return value;
+        }
+    }
+})
+</script>
+</body>
+</html>
