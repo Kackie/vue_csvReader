@@ -74,7 +74,7 @@ var app = new Vue({
     },
     methods:{
         valueWrite:function(value){
-            value = value.replace(/^(https?|ftp)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)$/, "<a href='"+value+"' target='_blank'>"+value+"</a>");
+            value = value.replace(/https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:@&=+$,%#]+/g, "<a href='$&' target='_blank'>$&</a>");
             return value;
         }
     }
