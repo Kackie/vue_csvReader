@@ -1,76 +1,229 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Document</title>
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>あつ森収集データベース</title>
+<style>
+    abbr,address,article,aside,audio,b,blockquote,body,canvas,caption,cite,code,dd,del,details,dfn,div,dl,dt,em,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,html,i,iframe,img,ins,kbd,label,legend,li,mark,menu,nav,object,ol,p,pre,q,samp,section,small,span,strong,sub,summary,sup,table,tbody,td,tfoot,th,thead,time,tr,ul,var,video{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:0 0}body{line-height:1}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}nav ul{list-style:none}blockquote,q{quotes:none}blockquote:after,blockquote:before,q:after,q:before{content:'';content:none}a{margin:0;padding:0;font-size:100%;vertical-align:baseline;background:0 0}ins{background-color:#ff9;color:#000;text-decoration:none}mark{background-color:#ff9;color:#000;font-style:italic;font-weight:700}del{text-decoration:line-through}abbr[title],dfn[title]{border-bottom:1px dotted;cursor:help}table{border-collapse:collapse;border-spacing:0}hr{display:block;height:1px;border:0;border-top:1px solid #ccc;margin:1em 0;padding:0}input,select{vertical-align:middle}
+    [v-cloak]{display: none;}
+    *{word-break: break-all;}
+    table{font-size: 12px;border-top: 1px solid #ddd;border-left: 1px solid #ddd;margin-bottom: 30px;width: 100%;}
+    table th,table td{vertical-align: top;text-align: left;border-right: 1px solid #ddd;border-bottom: 1px solid #ddd;padding: 8px 10px;}
+    table th{white-space: nowrap;border-bottom-width: 2px;}
+    tbody tr:nth-child(even){background: #eee;}
+</style>
 </head>
 <body>
-
-<div id="app">
-<table>
+<div id="app" style="padding:20px;display: inline-block;position: relative;min-width: 900px;" v-cloak>
+<label for="csv"><input type="checkbox" v-model="csvToggle" id="csv">虫</label>
+<p style="margin-bottom:20px">検索：<input type="text" v-model.trim="keyword" v-on:keyup.esc="keyword=''"></p>
+<p style="position:absolute;top:20px;right:20px;">
+    <label for="south"><input type="checkbox" v-model="southToggle" id="south">南半球</label>
+    <label for="time"><input type="checkbox" v-model="realtimeCheck" id="time">リアルタイムチェック</label>
+</p>
+<div style="margin-bottom: 20px;">
+<button v-on:click="getTime()">現在時刻取得</button>
+<select name="" id="month" v-model="month">
+<option value="1">1月</option>
+<option value="2">2月</option>
+<option value="3">3月</option>
+<option value="4">4月</option>
+<option value="5">5月</option>
+<option value="6">6月</option>
+<option value="7">7月</option>
+<option value="8">8月</option>
+<option value="9">9月</option>
+<option value="10">10月</option>
+<option value="11">11月</option>
+<option value="12">12月</option>
+</select>
+<select name="" id="hour" v-model="hour">
+<option value="0">0時</option>
+<option value="1">1時</option>
+<option value="2">2時</option>
+<option value="3">3時</option>
+<option value="4">4時</option>
+<option value="5">5時</option>
+<option value="6">6時</option>
+<option value="7">7時</option>
+<option value="8">8時</option>
+<option value="9">9時</option>
+<option value="10">10時</option>
+<option value="11">11時</option>
+<option value="12">12時</option>
+<option value="13">13時</option>
+<option value="14">14時</option>
+<option value="15">15時</option>
+<option value="16">16時</option>
+<option value="17">17時</option>
+<option value="18">18時</option>
+<option value="19">19時</option>
+<option value="20">20時</option>
+<option value="21">21時</option>
+<option value="22">22時</option>
+<option value="23">23時</option>
+</select>
+</div>
+<table v-if="tableMode">
 <thead>
 <tr>
-<th v-for="(value,index) in getCSV[0]">{{value}}</th>
+<th 
+    v-for="(value,index) in label"
+    v-on:click="sort(index)"
+>{{value}}</th>
 </tr>
 </thead>
 <tbody>
-<tr v-for="(col,index) in getCSV">
-<td v-if="index>0" v-for="(value,colIndex) in col" v-bind:title="getCSV[0][colIndex]">{{value}}</td>
+<tr v-for="(col,index) in checkSVG">
+<td v-if="colIndex !== 4" v-for="(value,colIndex) in col" v-bind:title="label[colIndex]">
+<span v-if="colIndex === 3">
+<span v-if="!southToggle">{{monthVal(checkSVG[index][3])}}</span>
+<span v-else>{{monthVal(checkSVG[index][4])}}</span>
+</span>
+<span v-else-if="colIndex === 5">{{timeVal(value)}}</span>
+<span v-else>{{value}}</span>
+</td>
 </tr>
 </tbody>
 </table>
-{{getCSV}}
 </div><!-- /#app -->
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script>
 var app = new Vue({
     el:'#app',
     data:{
+        keyword:'',
+        tableMode:true,
+        csvFile1:'fish.csv',
+        csvFile2:'insect.csv',
+        dataArr1:[],
+        dataArr2:[],
+        sortArr:[],
+        displayArr:[],
+        label1:['No.','名前','売値','出現月','出現時間','場所,条件','魚影サイズ'],
+        label2:['No.','名前','売値','出現月','出現時間','場所','条件'],
+        southToggle:false,
         month:0,
-        csvFile:'fish.csv'
+        hour:0,
+        realtimeCheck:true,
+        csvToggle:false
+    },
+    created:function(){
+        this.getTime()
+        this.setSVG()
     },
     computed:{
-        getCSV:function(){
-            var txt = new XMLHttpRequest();
-            txt.open('get', this.csvFile, false);
-            txt.send();
-            //改行ごとに配列化
-            var arr = txt.responseText.split('\n');
-            var sortArr = [];
-            //ソート
-            for(var j=0;j<arr.length;j++){
-                if(j===0){
-                    sortArr.push(arr[j]);
-                }else if(arr[j].indexOf(this.keyword) !== -1) {
-                    sortArr.push(arr[j]);
+        label:function(){
+            return (this.csvToggle) ? this.label2 : this.label1
+        },
+        useSVG:function(){
+            return (this.csvToggle) ? this.dataArr2 : this.dataArr1
+        },
+        checkSVG:function(){
+            //リアルタイムチェック
+            var monthCheckArr = [];
+            this.displayArr = [];
+            if(this.realtimeCheck === true){
+                var sortArr1 = [];
+                var targetMonth = (this.southToggle) ? 4 : 3;
+                for(var k=0;k<this.useSVG.length;k++){
+                    if(this.useSVG[k][targetMonth] === 'all'){
+                        monthCheckArr.push(this.useSVG[k]);
+                    }else{
+                        var checkArr = this.useSVG[k][targetMonth].split('.');
+                        for(var l=0;l<checkArr.length;l++){
+                            if(checkArr[l] == this.month){
+                                monthCheckArr.push(this.useSVG[k]);
+                            }
+                        }
+                    }
                 }
+                for(var m=0;m<monthCheckArr.length;m++){
+                    if(monthCheckArr[m][5] === 'all'){
+                        this.displayArr.push(monthCheckArr[m]);
+                    }else{
+                        var checkArr = monthCheckArr[m][5].split('.');
+                        for(var n=0;n<checkArr.length;n++){
+                            if(parseInt(checkArr[n]) === this.hour){
+                                this.displayArr.push(monthCheckArr[m]);
+                            }
+                        }
+                    }
+                }
+            }else{
+                this.displayArr = this.useSVG
             }
             
             //1次元配列を2次元配列に変換
             var res = [];
-            for(var i = 0; i < sortArr.length; i++){
+            for(var i = 0; i < this.displayArr.length; i++){
                 //空白行が出てきた時点で終了
-                if(sortArr[i] == '') break;
+                if(this.displayArr[i] == '') break;
 
                 //","ごとに配列化
-                res[i] = sortArr[i].split(',');
+                res[i] = this.displayArr[i];
             }
             return res;
-        }
-    },
-    mounted:function(){
-        this.getMonth()
+        },
+        
     },
     methods:{
-        getMonth:function(){
+        setSVG:function(){
+            var csv1 = this.csvFile1;
+            var txt1 = new XMLHttpRequest();
+            txt1.open('get', csv1, false);
+            txt1.send();
+            
+            var arr1 = txt1.responseText.split('\n');
+            for(var h=0;h<arr1.length;h++){
+                if(arr1[h].indexOf(this.keyword) !== -1) {
+                    this.dataArr1.push(arr1[h].split(','));
+                }
+            }
+
+            var csv2 = this.csvFile2;
+            var txt2 = new XMLHttpRequest();
+            txt2.open('get', csv2, false);
+            txt2.send();
+            var arr2 = txt2.responseText.split('\n');
+            for(var g=0;g<arr2.length;g++){
+                if(arr2[g].indexOf(this.keyword) !== -1) {
+                    this.dataArr2.push(arr2[g].split(','));
+                }
+            }
+        },
+        
+        getTime:function(){
             var now = new Date()
             this.month = now.getMonth() + 1
+            this.hour = now.getHours()
         },
-        valueWrite:function(value){
-            value = value.replace(/https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:@&=+$,%#]+/g, "<a href='$&' target='_blank'>$&</a>");
-            return value;
+        monthVal:function(value){
+            if(value === 'all'){
+                return '年中'
+            }else{
+                var arr = value.split('.')
+                return arr[0] + '月～' + arr[arr.length-1] + '月'
+            }
+        },
+        timeVal:function(value){
+            if(value === 'all'){
+                return '24時間'
+            }else{
+                var arr = value.split('.')
+                if(arr[0] > arr[arr.length-1]){
+                    return arr[0] + '時～' + arr[arr.length-1] + '時'
+                }else{
+                    return arr[0] + '時～翌' + arr[arr.length-1] + '時'
+                }
+            }
+            return value
+        },
+        sort:function(index){
+            this.useSVG.sort(function(a,b){return(a[index] - b[index])})
         }
     }
 })
