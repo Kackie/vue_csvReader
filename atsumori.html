@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document</title>
+</head>
+<body>
+
+<div id="app">
+<table>
+<thead>
+<tr>
+<th v-for="(value,index) in getCSV[0]">{{value}}</th>
+</tr>
+</thead>
+<tbody>
+<tr v-for="(col,index) in getCSV">
+<td v-if="index>0" v-for="(value,colIndex) in col" v-bind:title="getCSV[0][colIndex]">{{value}}</td>
+</tr>
+</tbody>
+</table>
+{{getCSV}}
+</div><!-- /#app -->
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+var app = new Vue({
+    el:'#app',
+    data:{
+        month:0,
+        csvFile:'fish.csv'
+    },
+    computed:{
+        getCSV:function(){
+            var txt = new XMLHttpRequest();
+            txt.open('get', this.csvFile, false);
+            txt.send();
+            //改行ごとに配列化
+            var arr = txt.responseText.split('\n');
+            var sortArr = [];
+            //ソート
+            for(var j=0;j<arr.length;j++){
+                if(j===0){
+                    sortArr.push(arr[j]);
+                }else if(arr[j].indexOf(this.keyword) !== -1) {
+                    sortArr.push(arr[j]);
+                }
+            }
+            
+            //1次元配列を2次元配列に変換
+            var res = [];
+            for(var i = 0; i < sortArr.length; i++){
+                //空白行が出てきた時点で終了
+                if(sortArr[i] == '') break;
+
+                //","ごとに配列化
+                res[i] = sortArr[i].split(',');
+            }
+            return res;
+        }
+    },
+    mounted:function(){
+        this.getMonth()
+    },
+    methods:{
+        getMonth:function(){
+            var now = new Date()
+            this.month = now.getMonth() + 1
+        },
+        valueWrite:function(value){
+            value = value.replace(/https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:@&=+$,%#]+/g, "<a href='$&' target='_blank'>$&</a>");
+            return value;
+        }
+    }
+})
+</script>
+</body>
+</html>
