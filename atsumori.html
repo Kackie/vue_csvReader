@@ -24,7 +24,7 @@
     <label for="time"><input type="checkbox" v-model="realtimeCheck" id="time">リアルタイムチェック</label>
 </p>
 <div style="margin-bottom: 20px;">
-<button v-on:click="getTime()">現在時刻取得</button>
+<button v-on:click="{getTime() (realtimeCheck = true)}">現在時刻取得</button>
 <select name="" id="month" v-model="month">
 <option value="1">1月</option>
 <option value="2">2月</option>
@@ -135,19 +135,20 @@ var app = new Vue({
                     }else{
                         var checkArr = this.useSVG[k][targetMonth].split('.');
                         for(var l=0;l<checkArr.length;l++){
-                            if(checkArr[l] == this.month){
+                            if(checkArr[l] == parseInt(this.month)){
                                 monthCheckArr.push(this.useSVG[k]);
                             }
                         }
                     }
                 }
+                console.log(monthCheckArr)
                 for(var m=0;m<monthCheckArr.length;m++){
                     if(monthCheckArr[m][5] === 'all'){
                         this.displayArr.push(monthCheckArr[m]);
                     }else{
                         var checkArr = monthCheckArr[m][5].split('.');
                         for(var n=0;n<checkArr.length;n++){
-                            if(parseInt(checkArr[n]) === this.hour){
+                            if(parseInt(checkArr[n]) === parseInt(this.hour)){
                                 this.displayArr.push(monthCheckArr[m]);
                             }
                         }
