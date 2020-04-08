@@ -124,10 +124,10 @@ var app = new Vue({
         },
         sortCSV:function(){
             var sortCSV = []
-            for(var i=0;i<this.useCSV.length;i++){
-                for(var j=0;j<this.useCSV[i].length;j++){
-                    if(this.useCSV[i][j].indexOf(this.keyword) !== -1) {
-                        sortCSV.push(this.useCSV[i]);
+            for(var i=0;i<this.checkCSV.length;i++){
+                for(var j=0;j<this.checkCSV[i].length;j++){
+                    if(this.checkCSV[i][j].indexOf(this.keyword) !== -1) {
+                        sortCSV.push(this.checkCSV[i]);
                         break
                     }
                 }
