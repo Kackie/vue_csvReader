@@ -24,7 +24,7 @@
     <label for="time"><input type="checkbox" v-model="realtimeCheck" id="time">リアルタイムチェック</label>
 </p>
 <div style="margin-bottom: 20px;">
-<button v-on:click="{getTime() (realtimeCheck = true)}">現在時刻取得</button>
+<button v-on:click="getTime() (realtimeCheck = true)">現在時刻取得</button>
 <select name="" id="month" v-model="month">
 <option value="1">1月</option>
 <option value="2">2月</option>
@@ -76,11 +76,11 @@
 </tr>
 </thead>
 <tbody>
-<tr v-for="(col,index) in checkSVG">
+<tr v-for="(col,index) in sortCSV">
 <td v-if="colIndex !== 4" v-for="(value,colIndex) in col" v-bind:title="label[colIndex]">
 <span v-if="colIndex === 3">
-<span v-if="!southToggle">{{monthVal(checkSVG[index][3])}}</span>
-<span v-else>{{monthVal(checkSVG[index][4])}}</span>
+<span v-if="!southToggle">{{monthVal(sortCSV[index][3])}}</span>
+<span v-else>{{monthVal(sortCSV[index][4])}}</span>
 </span>
 <span v-else-if="colIndex === 5">{{timeVal(value)}}</span>
 <span v-else>{{value}}</span>
@@ -113,35 +113,47 @@ var app = new Vue({
     },
     created:function(){
         this.getTime()
-        this.setSVG()
+        this.setCSV()
     },
     computed:{
         label:function(){
             return (this.csvToggle) ? this.label2 : this.label1
         },
-        useSVG:function(){
+        useCSV:function(){
             return (this.csvToggle) ? this.dataArr2 : this.dataArr1
         },
-        checkSVG:function(){
+        sortCSV:function(){
+            var sortCSV = []
+            for(var i=0;i<this.useCSV.length;i++){
+                for(var j=0;j<this.useCSV[i].length;j++){
+                    if(this.useCSV[i][j].indexOf(this.keyword) !== -1) {
+                        sortCSV.push(this.useCSV[i]);
+                        break
+                    }
+                }
+            }
+            return sortCSV
+        },
+        checkCSV:function(){
             //リアルタイムチェック
             var monthCheckArr = [];
             this.displayArr = [];
+
             if(this.realtimeCheck === true){
                 var sortArr1 = [];
                 var targetMonth = (this.southToggle) ? 4 : 3;
-                for(var k=0;k<this.useSVG.length;k++){
-                    if(this.useSVG[k][targetMonth] === 'all'){
-                        monthCheckArr.push(this.useSVG[k]);
+                for(var k=0;k<this.useCSV.length;k++){
+                    if(this.useCSV[k][targetMonth] === 'all'){
+                        monthCheckArr.push(this.useCSV[k]);
                     }else{
-                        var checkArr = this.useSVG[k][targetMonth].split('.');
+                        var checkArr = this.useCSV[k][targetMonth].split('.');
                         for(var l=0;l<checkArr.length;l++){
                             if(checkArr[l] == parseInt(this.month)){
-                                monthCheckArr.push(this.useSVG[k]);
+                                monthCheckArr.push(this.useCSV[k]);
                             }
                         }
                     }
                 }
-                console.log(monthCheckArr)
                 for(var m=0;m<monthCheckArr.length;m++){
                     if(monthCheckArr[m][5] === 'all'){
                         this.displayArr.push(monthCheckArr[m]);
@@ -155,7 +167,7 @@ var app = new Vue({
                     }
                 }
             }else{
-                this.displayArr = this.useSVG
+                this.displayArr = this.useCSV
             }
             
             //1次元配列を2次元配列に変換
@@ -172,7 +184,7 @@ var app = new Vue({
         
     },
     methods:{
-        setSVG:function(){
+        setCSV:function(){
             var csv1 = this.csvFile1;
             var txt1 = new XMLHttpRequest();
             txt1.open('get', csv1, false);
@@ -180,9 +192,7 @@ var app = new Vue({
             
             var arr1 = txt1.responseText.split('\n');
             for(var h=0;h<arr1.length;h++){
-                if(arr1[h].indexOf(this.keyword) !== -1) {
-                    this.dataArr1.push(arr1[h].split(','));
-                }
+                this.dataArr1.push(arr1[h].split(','));
             }
 
             var csv2 = this.csvFile2;
@@ -191,9 +201,7 @@ var app = new Vue({
             txt2.send();
             var arr2 = txt2.responseText.split('\n');
             for(var g=0;g<arr2.length;g++){
-                if(arr2[g].indexOf(this.keyword) !== -1) {
-                    this.dataArr2.push(arr2[g].split(','));
-                }
+                this.dataArr2.push(arr2[g].split(','));
             }
         },
         
@@ -224,7 +232,7 @@ var app = new Vue({
             return value
         },
         sort:function(index){
-            this.useSVG.sort(function(a,b){return(a[index] - b[index])})
+            this.useCSV.sort(function(a,b){return(a[index] - b[index])})
         }
     }
 })
