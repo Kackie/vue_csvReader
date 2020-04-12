@@ -5,18 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
 <title>あつ森収集データベース</title>
-<style>
-    abbr,address,article,aside,audio,b,blockquote,body,canvas,caption,cite,code,dd,del,details,dfn,div,dl,dt,em,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,html,i,iframe,img,ins,kbd,label,legend,li,mark,menu,nav,object,ol,p,pre,q,samp,section,small,span,strong,sub,summary,sup,table,tbody,td,tfoot,th,thead,time,tr,ul,var,video{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:0 0}body{line-height:1}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}nav ul{list-style:none}blockquote,q{quotes:none}blockquote:after,blockquote:before,q:after,q:before{content:'';content:none}a{margin:0;padding:0;font-size:100%;vertical-align:baseline;background:0 0}ins{background-color:#ff9;color:#000;text-decoration:none}mark{background-color:#ff9;color:#000;font-style:italic;font-weight:700}del{text-decoration:line-through}abbr[title],dfn[title]{border-bottom:1px dotted;cursor:help}table{border-collapse:collapse;border-spacing:0}hr{display:block;height:1px;border:0;border-top:1px solid #ccc;margin:1em 0;padding:0}input,select{vertical-align:middle}
-    [v-cloak]{display: none;}
-    *{word-break: break-all;}
-    table{font-size: 12px;border-top: 1px solid #ddd;border-left: 1px solid #ddd;margin-bottom: 30px;width: 100%;}
-    table th,table td{vertical-align: top;text-align: left;border-right: 1px solid #ddd;border-bottom: 1px solid #ddd;padding: 8px 10px;}
-    table th{white-space: nowrap;border-bottom-width: 2px;}
-    tbody tr:nth-child(even){background: #eee;}
-</style>
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<div id="app" style="padding:20px;display: inline-block;position: relative;min-width: 900px;" v-cloak>
+<div id="app" v-cloak>
 <label for="csv"><input type="checkbox" v-model="csvToggle" id="csv">虫</label>
 <p style="margin-bottom:20px">検索：<input type="text" v-model.trim="keyword" v-on:keyup.esc="keyword=''"></p>
 <p style="position:absolute;top:20px;right:20px;">
@@ -66,7 +58,21 @@
 <option value="23">23時</option>
 </select>
 </div>
-<table v-if="tableMode">
+<table class="fixedHead" v-show="is_fixed">
+<thead>
+<tr>
+<th 
+v-for="(value,index) in label"
+v-on:click="sort(index)"
+>{{value}}</th>
+</tr>
+</thead>
+</table><!-- /.fixedHead -->
+<table
+    v-if="tableMode"
+    class="csvTable"
+    v-bind:class="(csvToggle) ? 'insect' : 'fish'
+">
 <thead>
 <tr>
 <th 
@@ -75,167 +81,61 @@
 >{{value}}</th>
 </tr>
 </thead>
-<tbody>
-<tr v-for="(col,index) in sortCSV">
-<td v-if="colIndex !== 4" v-for="(value,colIndex) in col" v-bind:title="label[colIndex]">
-<span v-if="colIndex === 3">
-<span v-if="!southToggle">{{monthVal(sortCSV[index][3])}}</span>
-<span v-else>{{monthVal(sortCSV[index][4])}}</span>
-</span>
-<span v-else-if="colIndex === 5">{{timeVal(value)}}</span>
-<span v-else>{{value}}</span>
-</td>
-</tr>
-</tbody>
+<transition-group tag="tbody" name="insert">
+    <tr v-for="(col,index) in sortCSV" v-bind:key="'col'+index">
+        <td v-if="colIndex !== 4" v-for="(value,colIndex) in col" v-bind:title="label[colIndex]">
+            <template v-if="colIndex === 1">
+                <button class="txtBtn" v-on:click="modalOpen(sortCSV[index][0])">{{value}}</button>
+            </template>
+            <template v-else-if="colIndex === 3">
+                <template v-if="!southToggle">{{monthVal(sortCSV[index][3])}}</template>
+                <template v-else>{{monthVal(sortCSV[index][4])}}</template>
+            </template>
+            <template v-else-if="colIndex === 5">{{timeVal(value)}}</template>
+            <template v-else>{{value}}</template>
+        </td>
+    </tr>
+</transition-group>
 </table>
+<div class="modal" v-show="modalFlag">
+<div class="modalInner">
+<p class="name"><span class="num">No.{{useCSV[modalNo][0]}}</span>{{useCSV[modalNo][1]}}</p>
+<table>
+<tr>
+<th>売値</th>
+<td>{{useCSV[modalNo][2]}}ベル</td>
+</tr>
+<tr>
+<th>出現月</th>
+<td>北半球：{{monthVal(useCSV[modalNo][3])}}<br>南半球：{{monthVal(useCSV[modalNo][4])}}</td>
+</tr>
+<tr>
+<th>出現時間</th>
+<td>{{timeVal(useCSV[modalNo][5])}}</td>
+</tr>
+<tr v-if="csvToggle">
+<th>場所</th>
+<td>{{useCSV[modalNo][6]}}</td>
+</tr>
+<tr v-else>
+<th>場所,条件</th>
+<td>{{useCSV[modalNo][6]}}</td>
+</tr>
+<tr v-if="csvToggle">
+<th>条件</th>
+<td>{{useCSV[modalNo][7]}}</td>
+</tr>
+<tr v-else>
+<th>魚影サイズ</th>
+<td>{{useCSV[modalNo][7]}}</td>
+</tr>
+</table>
+</div><!-- /.modalInner -->
+<div class="modalBg" v-on:click="modalFlag = false"></div>
+</div><!-- /.modal -->
 </div><!-- /#app -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script>
-var app = new Vue({
-    el:'#app',
-    data:{
-        keyword:'',
-        tableMode:true,
-        csvFile1:'fish.csv',
-        csvFile2:'insect.csv',
-        dataArr1:[],
-        dataArr2:[],
-        sortArr:[],
-        displayArr:[],
-        label1:['No.','名前','売値','出現月','出現時間','場所,条件','魚影サイズ'],
-        label2:['No.','名前','売値','出現月','出現時間','場所','条件'],
-        southToggle:false,
-        month:0,
-        hour:0,
-        realtimeCheck:true,
-        csvToggle:false
-    },
-    created:function(){
-        this.getTime()
-        this.setCSV()
-    },
-    computed:{
-        label:function(){
-            return (this.csvToggle) ? this.label2 : this.label1
-        },
-        useCSV:function(){
-            return (this.csvToggle) ? this.dataArr2 : this.dataArr1
-        },
-        sortCSV:function(){
-            var sortCSV = []
-            for(var i=0;i<this.checkCSV.length;i++){
-                for(var j=0;j<this.checkCSV[i].length;j++){
-                    if(this.checkCSV[i][j].indexOf(this.keyword) !== -1) {
-                        sortCSV.push(this.checkCSV[i]);
-                        break
-                    }
-                }
-            }
-            return sortCSV
-        },
-        checkCSV:function(){
-            //リアルタイムチェック
-            var monthCheckArr = [];
-            this.displayArr = [];
-
-            if(this.realtimeCheck === true){
-                var sortArr1 = [];
-                var targetMonth = (this.southToggle) ? 4 : 3;
-                for(var k=0;k<this.useCSV.length;k++){
-                    if(this.useCSV[k][targetMonth] === 'all'){
-                        monthCheckArr.push(this.useCSV[k]);
-                    }else{
-                        var checkArr = this.useCSV[k][targetMonth].split('.');
-                        for(var l=0;l<checkArr.length;l++){
-                            if(checkArr[l] == parseInt(this.month)){
-                                monthCheckArr.push(this.useCSV[k]);
-                            }
-                        }
-                    }
-                }
-                for(var m=0;m<monthCheckArr.length;m++){
-                    if(monthCheckArr[m][5] === 'all'){
-                        this.displayArr.push(monthCheckArr[m]);
-                    }else{
-                        var checkArr = monthCheckArr[m][5].split('.');
-                        for(var n=0;n<checkArr.length;n++){
-                            if(parseInt(checkArr[n]) === parseInt(this.hour)){
-                                this.displayArr.push(monthCheckArr[m]);
-                            }
-                        }
-                    }
-                }
-            }else{
-                this.displayArr = this.useCSV
-            }
-            
-            //1次元配列を2次元配列に変換
-            var res = [];
-            for(var i = 0; i < this.displayArr.length; i++){
-                //空白行が出てきた時点で終了
-                if(this.displayArr[i] == '') break;
-
-                //","ごとに配列化
-                res[i] = this.displayArr[i];
-            }
-            return res;
-        },
-        
-    },
-    methods:{
-        setCSV:function(){
-            var csv1 = this.csvFile1;
-            var txt1 = new XMLHttpRequest();
-            txt1.open('get', csv1, false);
-            txt1.send();
-            
-            var arr1 = txt1.responseText.split('\n');
-            for(var h=0;h<arr1.length;h++){
-                this.dataArr1.push(arr1[h].split(','));
-            }
-
-            var csv2 = this.csvFile2;
-            var txt2 = new XMLHttpRequest();
-            txt2.open('get', csv2, false);
-            txt2.send();
-            var arr2 = txt2.responseText.split('\n');
-            for(var g=0;g<arr2.length;g++){
-                this.dataArr2.push(arr2[g].split(','));
-            }
-        },
-        
-        getTime:function(){
-            var now = new Date()
-            this.month = now.getMonth() + 1
-            this.hour = now.getHours()
-        },
-        monthVal:function(value){
-            if(value === 'all'){
-                return '年中'
-            }else{
-                var arr = value.split('.')
-                return arr[0] + '月～' + arr[arr.length-1] + '月'
-            }
-        },
-        timeVal:function(value){
-            if(value === 'all'){
-                return '24時間'
-            }else{
-                var arr = value.split('.')
-                if(arr[0] > arr[arr.length-1]){
-                    return arr[0] + '時～' + arr[arr.length-1] + '時'
-                }else{
-                    return arr[0] + '時～翌' + arr[arr.length-1] + '時'
-                }
-            }
-            return value
-        },
-        sort:function(index){
-            this.useCSV.sort(function(a,b){return(a[index] - b[index])})
-        }
-    }
-})
-</script>
+<script src="scripts/common.js"></script>
 </body>
 </html>

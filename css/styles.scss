@@ -1,0 +1,103 @@
+abbr,address,article,aside,audio,b,blockquote,body,canvas,caption,cite,code,dd,del,details,dfn,div,dl,dt,em,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,html,i,iframe,img,ins,kbd,label,legend,li,mark,menu,nav,object,ol,p,pre,q,samp,section,small,span,strong,sub,summary,sup,table,tbody,td,tfoot,th,thead,time,tr,ul,var,video{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:0 0}body{line-height:1}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}nav ul{list-style:none}blockquote,q{quotes:none}blockquote:after,blockquote:before,q:after,q:before{content:'';content:none}a{margin:0;padding:0;font-size:100%;vertical-align:baseline;background:0 0}ins{background-color:#ff9;color:#000;text-decoration:none}mark{background-color:#ff9;color:#000;font-style:italic;font-weight:700}del{text-decoration:line-through}abbr[title],dfn[title]{border-bottom:1px dotted;cursor:help}table{border-collapse:collapse;border-spacing:0}hr{display:block;height:1px;border:0;border-top:1px solid #ccc;margin:1em 0;padding:0}input,select{vertical-align:middle}
+*{word-break: break-all;}
+[v-cloak]{display: none;}
+.insert-enter-active, .insert-leave-active {
+  transition: opacity .5s;
+}
+.insert-enter, .insert-leave-to /* .insert-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+
+html{font-size: 10px;}
+#app{
+    @media screen and (min-width: 769px) {
+        max-width: 900px;
+        position: relative;
+        margin: 0 auto;
+        padding: 20px;
+        font-size: 1.4rem;
+    }
+    @media screen and (max-width: 768px) {
+        font-size: 1.4rem;
+    }
+
+}
+.modal{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .modalInner{
+        background: #fff;
+        position: relative;
+        z-index: 2;
+    }
+    .modalBg{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        background: rgba(0,0,0,0.2);
+    }
+}
+.csvTable,.fixedHead{
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    text-align: center;
+    th,td{
+        vertical-align: top;
+        text-align: left;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+    th{
+        white-space: nowrap;
+        border-bottom: 2px solid #ccc;
+        background: #eee;
+    }
+    .txtBtn{
+        padding: 0;
+        margin: 0;
+        background: none;
+        border: none;
+        font-size: 100%;
+    }
+    tr:nth-child(even){
+        background-color: #eee;
+    }
+    @media screen and (min-width: 769px) {
+    }
+    @media screen and (max-width: 768px) {
+        thead tr th:first-child{
+            display: none;
+        }
+        tbody tr td:first-child{
+            display: none;
+        }
+        &.fish{
+            thead tr th:nth-child(4),
+            tbody tr td:nth-child(4),
+            thead tr th:nth-child(7),
+            tbody tr td:nth-child(7){
+                display: none;
+            }
+        }
+        &.insect{
+            thead tr th:nth-child(4),
+            tbody tr td:nth-child(4),
+            thead tr th:nth-child(6),
+            tbody tr td:nth-child(6){
+                display: none;
+            }
+        }
+    }
+}
