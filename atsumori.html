@@ -58,16 +58,6 @@
 <option value="23">23時</option>
 </select>
 </div>
-<table class="fixedHead" v-show="is_fixed">
-<thead>
-<tr>
-<th 
-v-for="(value,index) in label"
-v-on:click="sort(index)"
->{{value}}</th>
-</tr>
-</thead>
-</table><!-- /.fixedHead -->
 <table
     v-if="tableMode"
     class="csvTable"

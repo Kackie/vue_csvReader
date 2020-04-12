@@ -28,14 +28,18 @@ html{font-size: 10px;}
     left: 0;
     width: 100%;
     height: 100%;
-    display: none;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
     .modalInner{
         background: #fff;
         position: relative;
         z-index: 2;
+        width: 100%;
+        max-width: 600px;
     }
     .modalBg{
         position: absolute;
@@ -70,6 +74,8 @@ html{font-size: 10px;}
         background: none;
         border: none;
         font-size: 100%;
+        text-align: left;
+        appearance: none;
     }
     tr:nth-child(even){
         background-color: #eee;
@@ -77,6 +83,7 @@ html{font-size: 10px;}
     @media screen and (min-width: 769px) {
     }
     @media screen and (max-width: 768px) {
+        font-size: 1.2rem;
         thead tr th:first-child{
             display: none;
         }
